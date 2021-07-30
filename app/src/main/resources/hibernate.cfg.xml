@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD//EN" "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <!-- sqlite properties -->
+    <property name="hibernate.dialect">org.hibernate.dialect.SQLiteDialect</property>
+    <property name="connection.url">jdbc:sqlite:lab3.sqlite</property>
+    <property name="connection.driver_class">org.sqlite.JDBC</property>
+    <!-- Set this to "true" to print all executed SQL to stdout -->
+    <property name="show_sql">false</property>
+    <!-- generate the schema at startup -->
+    <property name="hibernate.hbm2ddl.auto">create</property>
+    <!-- specify the classes that are mapped to database tables -->
+    <mapping class="uc.seng301.eventapp.model.EventType"/>
+    <mapping class="uc.seng301.eventapp.model.Participant"/>
+    <mapping class="uc.seng301.eventapp.model.Location"/>
+    <mapping class="uc.seng301.eventapp.model.Event"/>
+    <mapping class="uc.seng301.eventapp.model.ArchivedEvent"/>
+    <mapping class="uc.seng301.eventapp.model.CanceledEvent"/>
+    <mapping class="uc.seng301.eventapp.model.PastEvent"/>
+    <mapping class="uc.seng301.eventapp.model.ScheduledEvent"/>
+  </session-factory>
+</hibernate-configuration>

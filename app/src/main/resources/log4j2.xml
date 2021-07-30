@@ -1,0 +1,66 @@
+<Configuration status="info">
+  <!-- see https://logging.apache.org/log4j/2.x/manual/appenders.html -->
+  <Appenders>
+    <!-- the following defines a log file where application log will be output, it "rolls over" multiple files -->
+    <RollingFile name="sqllog" fileName="log/sql.log" filePattern="log/sql-%d{yyyy-MM-dd}-%i.log">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger - %msg%n"/>
+      <Policies>
+        <SizeBasedTriggeringPolicy size="1950KB" />
+      </Policies>
+      <DefaultRolloverStrategy max="1"/>
+    </RollingFile>
+
+    <RollingFile name="allother" fileName="log/other.log" filePattern="log/other-%d{yyyy-MM-dd}-%i.log">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger - %msg%n"/>
+      <Policies>
+        <SizeBasedTriggeringPolicy size="1950KB" />
+      </Policies>
+      <DefaultRolloverStrategy max="1"/>
+    </RollingFile>
+
+    <RollingFile name="applog" fileName="log/app.log" filePattern="log/app-%d{yyyy-MM-dd}-%i.log">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger - %msg%n"/>
+      <Policies>
+        <SizeBasedTriggeringPolicy size="1950KB" />
+      </Policies>
+      <DefaultRolloverStrategy max="1"/>
+    </RollingFile>
+
+    <!-- the following defines a logger that will output to stdout -->
+    <Console name="stdout" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %logger{36}:%L - %msg%n"/>
+    </Console>
+  </Appenders>
+
+  <Loggers>
+    <!-- bind hibernate sql loggers to dedicated sql log file (bad practice to have that in production)
+            and defines print level to "trace". Additivity "false" means that all printed log statements won't
+            be passed to parent logger -->
+    <Logger name="org.hibernate.SQL" level="TRACE" additivity="false">
+      <AppenderRef ref="sqllog"/>
+    </Logger>
+    <Logger name="org.hibernate.type.descriptor.sql" level="TRACE" additivity="false">
+      <AppenderRef ref="sqllog"/>
+    </Logger>
+
+    <!-- send app-related log statements (i.e. every logger with names starting with "uc.seng301" to both
+            app log file and console appenders (with different log levels) -->
+    <Logger name="uc.seng301">
+      <AppenderRef ref="applog" level="DEBUG"/>
+      <!-- stdout appender (commented out for CLI application) -->
+      <!-- AppenderRef ref="stdout" level="INFO"/ -->
+    </Logger>
+    <!-- uncomment below logger if you want to log from your cucumber classes
+    <Logger name="gradle.cucumber">
+      <AppenderRef ref="stdout" level="ALL"/>
+    </Logger> -->
+
+    <!--  Alternatively, all declared loggers (even library ones) can be passed to "parent" root logger that
+            will collect all log statements that are not redirected to other appenders (as both hibernate ones above)
+            and all forwarded ones as uc.seng301 logger above that is also sent to this root logger.
+            You can also see that uc.seng301 log debug statements wil printed here while not printed in applog file. -->
+    <Root level="all" additivity="false">
+      <AppenderRef ref="allother"/>
+    </Root>
+  </Loggers>
+</Configuration>

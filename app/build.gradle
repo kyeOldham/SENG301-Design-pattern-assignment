@@ -1,0 +1,101 @@
+/*
+ * Created on Wed Apr 07 2021
+ *
+ * The Unlicense
+ * This is free and unencumbered software released into the public domain.
+ *
+ * Anyone is free to copy, modify, publish, use, compile, sell, or distribute
+ * this software, either in source code form or as a compiled binary, for any
+ * purpose, commercial or non-commercial, and by any means.
+ *
+ * In jurisdictions that recognize copyright laws, the author or authors of this
+ * software dedicate any and all copyright interest in the software to the public
+ * domain. We make this dedication for the benefit of the public at large and to
+ * the detriment of our heirs and successors. We intend this dedication to be an
+ * overt act of relinquishment in perpetuity of all present and future rights to
+ * this software under copyright law.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information, please refer to <https://unlicense.org>
+ */
+
+plugins {
+  // Apply the application plugin to add support for building a CLI application in Java.
+  id 'application'
+}
+
+repositories {
+  // Use JCenter for resolving dependencies.
+  jcenter()
+}
+
+dependencies {
+  // Use JUnit Jupiter API for testing.
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+  // This dependency is used by the application.
+  implementation 'com.google.guava:guava:29.0-jre'
+
+  // Hibernate as JPA implementation (SENG301 lab 3)
+  compile group: 'org.hibernate', name: 'hibernate-core', version: '5.4.29.Final'
+
+  // In-memory database for testing (SENG301 lab 3)
+  compile group: 'com.h2database', name: 'h2', version: '1.4.200'
+
+  // Sqlite as persistent DB (SENG301 lab 3)
+  compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.34.0'
+  compile group: 'com.zsoltfabok', name: 'sqlite-dialect', version: '1.0'
+
+  // Cucumber and mockito for acceptance testing (SENG301 lab 4)
+  testImplementation 'io.cucumber:cucumber-java:6.9.1'
+  implementation group: 'org.mockito', name: 'mockito-core', version: '3.8.0'
+
+  // Logging facility (SENG301 lecture 8 and lab 5)
+  compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.1'
+
+  // JSON deserialisation (for external REST API, lab 5)
+  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.12.2'
+  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.12.2'
+  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.2'
+}
+
+application {
+  mainClass = 'uc.seng301.eventapp.App'
+}
+
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
+}
+
+task cucumber() {
+    dependsOn assemble, testClasses
+    doLast {
+        javaexec {
+            main = "io.cucumber.core.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = ['--plugin', 'pretty', '--glue', 'gradle.cucumber', 'src/test/resources']
+        }
+    }
+}
+
+test {
+  useJUnitPlatform()
+  // force the test task to run Cucumber too
+  finalizedBy cucumber
+}
+
+run {
+    // this is needed if you want to start your main class with gradle run
+    // you may also pass the --console=PLAIN option to disable the green progress bar
+    // e.g., gradle --console=PLAIN run
+    standardInput = System.in
+}
